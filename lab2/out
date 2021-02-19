@@ -1,5 +1,0 @@
-F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
-0 S 375994 21727 21719  0 80   0 - 31562 do_wai pts/0    00:00:00 bash
-0 S 375994 21773 21727  0 80   0 -  1054 hrtime pts/0    00:00:00 main
-0 S 375994 21778 21727  0 80   0 -  1054 hrtime pts/0    00:00:00 main
-0 R 375994 21822 21727  0 80   0 - 38333 -      pts/0    00:00:00 ps
