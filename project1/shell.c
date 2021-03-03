@@ -1,15 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
-
 #include <unistd.h>
 #include <sys/wait.h>
-
 #include <string.h>
 
-int nonBuiltIn(char* input, char* argv[]);
+void cmdForeground(char* args[]);
+void cmdBackground(char* args[]);
+void parseArgs(char* input, char* args[]);
+char lastChar(char*);
 
-//TODO free memory leaks
+//TODO free memory leaks, kill processes, comment
 int main(int argc, char* argv[]) {
     // Set the prompt	 
     char* prompt;
@@ -19,59 +20,95 @@ int main(int argc, char* argv[]) {
     } else if(argc == 1) {
         prompt = "308sh";
     } else {
-        puts("Enter '-p <prompt>' as arguments for a custom prompt");
+        printf("Enter '-p <prompt>' as arguments for a custom prompt");
         return 0;
     }
-    printf("%s> ", prompt);
 
     // User input infinite loop
     char* input = NULL;
     size_t len = 0;
     while (1) {
+        printf("\n%s> ", prompt);
+
         // Get user input
         getline(&input, &len, stdin);
         strtok(input, "\n");
-        //puts(input);
-        //printf("%lu\n", strlen(input));
 
         // ---------- Builtin Commands ---------------------------------------	 	 
         if (strcmp(input, "exit") == 0) {
             return 0;
         } else if (strcmp(input, "pid") == 0) {
-            printf("Shell Process ID: %d\n", getpid());
+            printf("Shell Process ID: %d", getpid());
         } else if (strcmp(input, "ppid") == 0) {
-            printf("Parent Process ID: %d\n", getppid());
+            printf("Parent Process ID: %d", getppid());
 
         } else if (strcmp(input, "pwd") == 0) {
-            printf("Current working directory: %s\n", getcwd(NULL, 0));
+            printf("Current working directory: %s", getcwd(NULL, 0));
         } else if (strncmp(input, "cd", 2) == 0) {
             if(strlen(input) > 2) {
                 char* path = strtok(input, " ");
                 path = strtok(NULL, "\0");
 
                 if(chdir(path) == 0) {
-                    printf("New working directory: %s\n", getcwd(NULL, 0));
+                    printf("New working directory: %s", getcwd(NULL, 0));
                 } else {
-                    puts("Path invalid");
+                    printf("Path invalid");
                 }
             } else {
                 chdir(getenv("HOME"));
-                printf("Home directory: %s\n", getcwd(NULL, 0));
+                printf("Home directory: %s", getcwd(NULL, 0));
             }
         } else {
             // ---------- Non-Builtin Commands--------------------------
-            nonBuiltIn(input, argv);
+            char* args[20];
+            parseArgs(input, args);
+
+            if(lastChar(args[0]) == '&') {
+                cmdBackground(args);
+            } else {
+                cmdForeground(args);
+            }
         }
-        printf("%s> ", prompt);
     }
-    return 0;
+    return 1;
 }
 // ----------------------------------- Helper Functions ----------------------------------
-int nonBuiltIn(char* input, char* argv[]) {
-    if(fork() == 0) {    
-        char* cmd = strtok(input, " ");   
-        execvp(cmd, argv); //wtf
+void cmdForeground(char* args[]) {
+    pid_t pid = fork(); // don't work atm
+    if(pid == 0) {      
+        printf("Child PID: %d", pid);
+
+        if(execvp(args[0], args) == -1) {
+            printf("That is not a valid command");
+        }
     } else {
-        waitpid(-1, NULL, 0);
+        int* stat_loc;
+        pid_t child = waitpid(pid, stat_loc, 0);
+        int status = *stat_loc;
+        printf("Child %d exited with status %d", child, status);
+    }
+}
+
+void cmdBackground(char* args[]) {
+    printf("Background processes not implemented yet");
+}
+
+void parseArgs(char* input, char* args[]) {
+    int i;
+    for(i = 0; i < 20; i++) {
+        args[i] = strsep(&input, " ");
+
+        if(args[i] == NULL) {
+            break;
+        }
+    }
+}
+
+char lastChar(char* str) {
+    int i;
+    for(i = 0; i < strlen(str); i++) {
+        if(i == strlen(str)-1) {
+            return str[i];
+        }
     }
 }
