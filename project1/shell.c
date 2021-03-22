@@ -14,7 +14,6 @@ char lastChar(char*);
 
 int backProcesses = 0;
 
-//TODO free memory leaks, kill processes, comment
 int main(int argc, char* argv[]) {
     // Set the prompt	 
     char* prompt;
