@@ -164,19 +164,74 @@ int main() {
 int first_come_first_served(const process proc[], int t)
 {
   /* TODO: Implement scheduling algorithm here */
-  return -1;
+  int i, minArrival;
+
+  for(i = 0; i < NUM_PROCESSES; i++) {
+    if(!proc[i].finished) {
+      minArrival = i;
+      break;
+    }
+  }
+
+  for(i = 0; i < NUM_PROCESSES; i++) {
+    if(proc[i].finished) {
+      continue;
+    }
+    if(proc[i].arrivaltime < proc[minArrival].arrivaltime) {
+      minArrival = i;
+    }
+  }
+  return minArrival;
 }
 
 int shortest_remaining_time(const process proc[], int t)
 {
   /* TODO: Implement scheduling algorithm here */
-  return -1;
+  int i, minTimeIndex;
+
+  for(i = 0; i < NUM_PROCESSES; i++) {
+    if(!proc[i].finished) {
+      minTimeIndex = i;
+      break;
+    }
+  }
+
+  for(i = 0; i < NUM_PROCESSES; i++) {
+    if(proc[i].finished) {
+      continue;
+    }
+    if(proc[i].remainingtime < proc[minTimeIndex].remainingtime) {
+      minTimeIndex = i;
+    }
+  }
+  return minTimeIndex;
 }
+
+int lastProcess = -1;
 
 int round_robin(const process proc[], int t)
 {
   /* TODO: Implement scheduling algorithm here */
   //HINT: consider using a static variable to keep track of the previously scheduled process
+  int i, firstUnfinished;
+
+  if(lastProcess == -1) {
+    lastProcess = 0;
+    return 0;
+  }
+
+  // Get the next unfinished process in the queue
+  for(i = lastProcess + 1; i < NUM_PROCESSES; i++) {
+    if(proc[i].finished) {
+      continue;
+    }
+    lastProcess = i;
+    return i;
+  }
+
+  if(lastProcess == NUM_PROCESSES-1) {
+    lastProcess = -1;
+  }
   return -1;
 }
 
