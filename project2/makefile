@@ -1,8 +1,8 @@
 compile:
-	gcc -o appserver server.c
+	gcc -o appserver server.c -lpthread
 
 debug:
-	gcc -g -o appserver server.c
+	gcc -g -o appserver server.c -lpthread
 
 clean:
 	rm appserver
