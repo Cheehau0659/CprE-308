@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <string.h>
 
 #define SIZE 32      /* size of the read buffer */
 #define ROOTSIZE 256 /* max size of the root directory */
@@ -138,16 +139,44 @@ void decodeBootSector(struct BootSector * pBootS, unsigned char buffer[])
 {
 	
 	// TODO: Pull the name and put it in the struct pBootS (remember to null-terminate)
-    
+	strncpy(pBootS->sName, &buffer[3], 9);
+
 	// TODO: Read bytes/sector and convert to big endian
+	unsigned char b1 = buffer[11];
+    unsigned char b2 = buffer[12];
+	pBootS->iBytesSector = endianSwap(b1, b2);
     
 	// TODO: Read sectors/cluster, Reserved sectors and Number of Fats
-    
+    pBootS->iSectorsCluster = buffer[13];
+	b1 = buffer[14];
+	b2 = buffer[15];
+	pBootS->iReservedSectors = endianSwap(b1, b2);
+	pBootS->iNumberFATs = buffer[16];
+
 	// TODO: Read root entries, logicical sectors and medium descriptor
+	b1 = buffer[17];
+	b2 = buffer[18];
+	pBootS->iRootEntries = endianSwap(b1, b2);
+	b1 = buffer[19];
+	b2 = buffer[20];
+	pBootS->iLogicalSectors = endianSwap(b1, b2);
+	pBootS->xMediumDescriptor = buffer[21];
     
 	// TODO: Read and covert sectors/fat, sectors/track, and number of heads
+	b1 = buffer[22];
+	b2 = buffer[23];
+	pBootS->iSectorsFAT = endianSwap(b1, b2);
+	b1 = buffer[24];
+	b2 = buffer[25];
+	pBootS->iSectorsTrack = endianSwap(b1, b2);
+	b1 = buffer[26];
+	b2 = buffer[27];
+	pBootS->iHeads = endianSwap(b1, b2);
     
 	// TODO: Read hidden sectors
+	b1 = buffer[28];
+	b2 = buffer[29];
+	pBootS->iHiddenSectors = endianSwap(b1, b2);
 	
 }
 
@@ -173,23 +202,23 @@ void parseDirectory(int iDirOff, int iEntries, unsigned char buffer[])
     		continue;
 
 		//Display filename
-		toDOSName(string, buffer, 0 /*TODO: replace 0 with correct value */);
+		toDOSName(string, buffer, i /*TODO: replace 0 with correct value */);
 		printf("%-12s\t", string);
 		
 		//Display Attributes
-		parseAttributes(string, 0 /*TODO: replace 0 with correct value */);
+		parseAttributes(string, i + 11 /*TODO: replace 0 with correct value */);
 		printf("%s\t", string);
 		
 		//Display Time
-		parseTime(string, 0 /*TODO: replace 0 with correct value */);
+		parseTime(string, i + 22 /*TODO: replace 0 with correct value */);
 		printf("%s\t", string);
 		
 		//Display Date
-		parseDate(string, 0 /*TODO: replace 0 with correct value */);
+		parseDate(string, i + 24 /*TODO: replace 0 with correct value */);
 		printf("%s\t", string);
 		
 		//Display Size
-		printf("%d\n", 0 /* TODO: replace 0 with actual size */);
+		printf("%d\n", i + 28 /* TODO: replace 0 with actual size */);
     }
     
     // Display key

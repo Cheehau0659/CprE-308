@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <string.h>
 
 #define SIZE 32  /* size of the read buffer */
 //define PRINT_HEX // un-comment this to print the values in hex for debugging
@@ -92,16 +93,44 @@ void decodeBootSector(struct BootSector * pBootS, unsigned char buffer[])
 {
 	
 	// TODO: Pull the name and put it in the struct pBootS (remember to null-terminate)
-    
+	strncpy(pBootS->sName, &buffer[3], 9);
+
 	// TODO: Read bytes/sector and convert to big endian
+	unsigned char b1 = buffer[11];
+    unsigned char b2 = buffer[12];
+	pBootS->iBytesSector = endianSwap(b1, b2);
     
 	// TODO: Read sectors/cluster, Reserved sectors and Number of Fats
-    
+    pBootS->iSectorsCluster = buffer[13];
+	b1 = buffer[14];
+	b2 = buffer[15];
+	pBootS->iReservedSectors = endianSwap(b1, b2);
+	pBootS->iNumberFATs = buffer[16];
+
 	// TODO: Read root entries, logicical sectors and medium descriptor
+	b1 = buffer[17];
+	b2 = buffer[18];
+	pBootS->iRootEntries = endianSwap(b1, b2);
+	b1 = buffer[19];
+	b2 = buffer[20];
+	pBootS->iLogicalSectors = endianSwap(b1, b2);
+	pBootS->xMediumDescriptor = buffer[21];
     
 	// TODO: Read and covert sectors/fat, sectors/track, and number of heads
+	b1 = buffer[22];
+	b2 = buffer[23];
+	pBootS->iSectorsFAT = endianSwap(b1, b2);
+	b1 = buffer[24];
+	b2 = buffer[25];
+	pBootS->iSectorsTrack = endianSwap(b1, b2);
+	b1 = buffer[26];
+	b2 = buffer[27];
+	pBootS->iHeads = endianSwap(b1, b2);
     
 	// TODO: Read hidden sectors
+	b1 = buffer[28];
+	b2 = buffer[29];
+	pBootS->iHiddenSectors = endianSwap(b1, b2);
 	
 }
 
